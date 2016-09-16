@@ -31,11 +31,10 @@ google.maps.event.addListener(cityCircle,'click',function() {
 
 
 
-// Construct the circle for each value in citymap.
-// Note: We scale the area of the circle based on the population.
+// Construct the circle for each station
 for (var station in stations) {
  // Add the circle for this city to the map.
- placeCircle(stations[station].center,stations[station].beta,stations[station].betaFactorAverage);
+ placeCircle(stations[station].center,stations[station].beta,stations[station].beta);
 }
 
 }
