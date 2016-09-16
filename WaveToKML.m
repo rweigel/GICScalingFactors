@@ -19,7 +19,7 @@ for i=1:length(waveform)
         fprintf(FH,'%s: {\n',regexprep(station.name,'[^a-zA-Z0-9]',''));
         fprintf(FH,'center: {lat: %4.4f, lng: %4.4f},\n',station.latitude,station.longitude);
         fprintf(FH,'beta: %2.4f,\n',station.betaFactorRaw);
-        fprintf(FH,'betaNorm: %2.4f,\n',betanorm(station.betaFactorRaw));
+        fprintf(FH,'betaNorm: %2.4f,\n',log10(station.betaFactorRaw+1));
         fprintf(FH,'betaFactorAverage: "%2.4f"\n',station.betaFactorAverage);
         fprintf(FH,'},\n');
     end

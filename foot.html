@@ -12,18 +12,18 @@ var infowindow = new google.maps.InfoWindow();
 function placeCircle(location, color, info) {
  var cityCircle = new google.maps.Circle({
   strokeColor: betaToColor(color),
-  strokeOpacity: 0.8,
-  strokeWeight: 2,
+  strokeOpacity: 0.35,
+  strokeWeight: 1,
 fillColor: betaToColor(color),
 fillOpacity: 0.35,
 map: map,
 center: location,
-radius: 10000
+radius: 30000
 });
 
 google.maps.event.addListener(cityCircle,'click',function() {
   infowindow.close();
-  infowindow.setContent("<div id='infowindow'>"+info+"</div>");
+  infowindow.setContent("<div id='infowindow'>log<sub>10</sub>(&beta;+1)="+info+"</div>");
   infowindow.open(map,cityCircle);
   infowindow.setPosition(location);
   });
@@ -34,7 +34,7 @@ google.maps.event.addListener(cityCircle,'click',function() {
 // Construct the circle for each station
 for (var station in stations) {
  // Add the circle for this city to the map.
- placeCircle(stations[station].center,stations[station].beta,stations[station].beta);
+ placeCircle(stations[station].center,stations[station].betaNorm,stations[station].betaNorm);
 }
 
 }
