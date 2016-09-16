@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <title>Circles</title>
+    <style>
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+      #map {
+        height: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <script>
+    function betaToColor(n) {
+    	var R = (255 * n)
+    	var G = 0
+    	var B = (255 * (1-n))
+	return "#" + hex(R) + hex(G) + hex(B);
+    }
+function hex(x) {
+         return ("0" + parseInt(x).toString(16)).slice(-2);
+	     }
+
+    </script>
+    <div id="map"></div>
+    <script>
