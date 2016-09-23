@@ -1,3 +1,20 @@
+
+function betaToColor(n,type) {                                                                                                                
+ var R = Math.floor(255*(-0.51*Math.sin(2*3.14*n/305)+0.46));
+ var G = Math.floor(255*(0.58*Math.sin(2*3.14*n/911)+0.24));
+ var B = Math.floor(255*(0.34*Math.sin(2*3.14*n/308)+0.52));
+ if(type==0) {
+  return "#" + hex(R) + hex(G) + hex(B);
+ } else {
+ return "rgb("+R+","+G+","+B+")";
+ }
+}
+
+function hex(x) {
+ return ("0" + parseInt(x).toString(16)).slice(-2);
+}
+
+
 function initMap() {
  // Create the map.
  var map = new google.maps.Map(document.getElementById('map'), {
@@ -9,12 +26,12 @@ mapTypeId: 'terrain'
 //Create infowindow
 var infowindow = new google.maps.InfoWindow();
 
-function placeCircle(location, color, info) {
+function placeCircle(location, color, info, name) {
  var cityCircle = new google.maps.Circle({
-  strokeColor: betaToColor(color),
-  strokeOpacity: 0.35,
-  strokeWeight: 1,
-fillColor: betaToColor(color),
+strokeColor: betaToColor(color,0),
+strokeOpacity: 0.35,
+strokeWeight: 1,
+fillColor: betaToColor(color,0),
 fillOpacity: 0.35,
 map: map,
 center: location,
@@ -23,18 +40,63 @@ radius: 30000
 
 google.maps.event.addListener(cityCircle,'click',function() {
   infowindow.close();
-  infowindow.setContent("<div id='infowindow'>log<sub>10</sub>(&beta;)="+info+"</div>");
+  infowindow.setContent("<div id='infowindow'>Station: "+name+"<br/>Latitude: "+location.lat+"<br/>Longitude: "+location.lng+"<br/>log<sub>10</sub>(&beta;)="+info+"</div>");
   infowindow.open(map,cityCircle);
   infowindow.setPosition(location);
   });
 }
+
+google.maps.event.addListenerOnce(map, 'tilesloaded', function() {
+    var maxIntensity = 1;
+    var minIntensity = -1;
+    var legendWidth = $('#legendGradient').outerWidth();
+
+var gradientCss = '(left';
+for (var j = 0; j <= 255; ++j) {
+     gradientCss += ', ' + betaToColor(j,1);
+}
+gradientCss += ')';
+
+$('#legendGradient').css('background', '-webkit-linear-gradient' + gradientCss);
+$('#legendGradient').css('background', '-moz-linear-gradient' + gradientCss);
+$('#legendGradient').css('background', '-o-linear-gradient' + gradientCss);
+$('#legendGradient').css('background', 'linear-gradient' + gradientCss);
+
+
+
+    for (var i = minIntensity; i <= maxIntensity; ++i) {
+        var offset = (i-minIntensity) * legendWidth / (maxIntensity-minIntensity) ;
+        if (i > minIntensity && i < maxIntensity) {
+            offset -= 0.5;
+        } else if (i == maxIntensity) {
+            offset -= 1;
+        }
+
+        $('#legend').append($('<div>').css({
+            'position': 'absolute',
+            'left': offset + 'px',
+            'top': '15px',
+            'width': '1px',
+            'height': '3px',
+            'background': 'black'
+        }));
+        $('#legend').append($('<div>').css({
+            'position': 'absolute',
+            'left': (offset - 5) + 'px',
+            'top': '18px',
+            'width': '10px',
+            'text-align': 'center'
+        }).html(i));
+    }
+
+});
 
 
 
 // Construct the circle for each station
 for (var station in stations) {
  // Add the circle for this city to the map.
- placeCircle(stations[station].center,(stations[station].betaNorm+1)/2,stations[station].betaNorm);
+ placeCircle(stations[station].center,(stations[station].betaNorm+1)/2*255,stations[station].betaNorm,stations[station].stationName);
 }
 
 }

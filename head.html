@@ -14,19 +14,12 @@
         height: 100%;
       }
     </style>
+<script src="http://code.jquery.com/jquery-latest.min.js" type="text/javascript"></script>
   </head>
   <body>
-    <script>
-    function betaToColor(n) {
-    	var R = (255 * n)
-    	var G = 0
-    	var B = (255 * (1-n))
-	return "#" + hex(R) + hex(G) + hex(B);
-    }
-function hex(x) {
-         return ("0" + parseInt(x).toString(16)).slice(-2);
-	     }
-
-    </script>
+  <div id="legend" style="position:relative; width:200px; height:30px; margin: 10px 0 0 10px; ">
+  <div id="legendGradient" style="width:100%; height:15px;"></div>
+  </div>
+    <br/>
     <div id="map"></div>
     <script>
