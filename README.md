@@ -10,7 +10,7 @@ Converts station data from .mat file to google-maps KML file.
     * R: -0.51 * sin(2 * pi * n / 305) + 0.46
     * G:  0.58 * sin(2 * pi * n / 911) + 0.24
     * B:  0.34 * sin(2 * pi * n / 308) + 0.52
-* Google abstracts marker from DOM, so not easily hideable by jquery with a slider
-    * [See this](https://stackoverflow.com/questions/9594130/how-to-hide-google-maps-api-markers-with-jquery)
+* ~~Google abstracts marker from DOM, so not easily hideable by jquery with a slider~~
+    * ~~[See this](https://stackoverflow.com/questions/9594130/how-to-hide-google-maps-api-markers-with-jquery)~~
     * [Also, jquery range slider](https://jqueryui.com/slider/#range)
 

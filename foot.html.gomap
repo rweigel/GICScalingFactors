@@ -1,0 +1,62 @@
+
+
+function betaToColor(n,type) {
+  var R = Math.floor(255*(-0.51*Math.sin(2*3.14*n/305)+0.46));
+  var G = Math.floor(255*(0.58*Math.sin(2*3.14*n/911)+0.24));
+  var B = Math.floor(255*(0.34*Math.sin(2*3.14*n/308)+0.52));
+  if(type==0) {
+    return "#" + hex(R) + hex(G) + hex(B);
+  } else {
+    return "rgb("+R+","+G+","+B+")";
+  }
+}
+
+function hex(x) {
+  return ("0" + parseInt(x).toString(16)).slice(-2);
+}
+
+function placeCircle(location, color, info, name) {
+
+  $.goMap.createCircle({
+    latitude:location.lat,
+    longitude:location.lng,
+    radius:30000,
+    color:betaToColor(color,0),
+    strokeOpacity:0,
+    fillColor:betaToColor(color,0),
+    fillOpacity:1,
+    id:name
+
+  });
+
+
+}
+
+function initMap() {
+  // Create the map.
+  $(function() {
+    $("#map").goMap({
+      latitude: 44,
+      longitude:-100,
+      zoom:5
+    });
+  });
+
+$(window).load(function(){
+  // Construct the circle for each station
+  for (var station in stations) {
+    // Add the circle for this city to the map.
+    placeCircle(stations[station].center,(stations[station].betaNorm+1)/2*255,stations[station].betaNorm,stations[station].stationName);
+  }
+});
+
+}
+
+</script>
+
+<div id="map"></div>
+
+<script type="text/javascript">initMap()</script>
+
+</body>
+</html>
