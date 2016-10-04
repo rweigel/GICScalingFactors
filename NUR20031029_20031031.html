@@ -23,11 +23,9 @@
   <body>
 
     <div id="legendBox" style="background: #FFF; z-index: 5; padding:15px; border:2px solid black;  border-radius: 10px; position:absolute; right:20px; top:20px;  width:200px; height:60px;">
+  <label for="amount">log<sub>10</sub>(&beta;):</label>
+  <input type="text" id="amount" readonly style="border:0; color:#f6931f; width:80px;">
   <div id="slider-range" ></div>
-  <!--
-  <label for="amount">Range:</label>
-  <input type="text" id="amount" readonly style="border:0; color:#f6931f; font-weight:bold;">
--->
   <div id="legendGradient" style="width:100%; height:15px;"></div>
   <div id="legend" style="position:relative; width:100%; height:30px; "></div>
 
@@ -13500,6 +13498,7 @@ stationName: "SR990"
 };
 
 function betaToColor(n,type) {
+ n=scaleToColor(n); //Scale n from [-1,1] to [0,255]
  var R = Math.floor(255*(-0.51*Math.sin(2*3.14*n/305)+0.46));
  var G = Math.floor(255*(0.58*Math.sin(2*3.14*n/911)+0.24));
  var B = Math.floor(255*(0.34*Math.sin(2*3.14*n/308)+0.52));
@@ -13510,14 +13509,25 @@ function betaToColor(n,type) {
  }
 }
 
+//Functions to scale between data range and color/radius range
+var colorMax=255;
+var colorMin=0;
+var varMax=1;
+var varMin=-1;
+
+function scaleToColor(n) {
+return (colorMax-colorMin)*(n-varMin)/(varMax-varMin)+colorMin;
+}
+function scaleToVar(n) {
+return (varMax-varMin)*(n-colorMin)/(colorMax-colorMin)+varMin;
+}
+
 function hex(x) {
  return ("0" + parseInt(x).toString(16)).slice(-2);
 }
 
 var myCircles=[];
 var radiusBase=30000;
-var maxScale=255;
-var minScale=1;
 
 function initMap() {
  // Create the map.
@@ -13530,16 +13540,17 @@ mapTypeId: 'terrain'
 $( function() {
   $( "#slider-range" ).slider({
     range: true,
-    min: 1,
-    max: 255,
-    values: [ 1, 255 ],
+    min: varMin,
+    max: varMax,
+    step: (varMax-varMin)/20,
+    values: [ varMin, varMax ],
     slide: function( event, ui ) {
-      $( "#amount" ).val( ui.values[ 0 ] + " - " + ui.values[ 1 ] );
-      HideByGroup(ui.values[ 0 ],ui.values[ 1 ])
+      $( "#amount" ).val( "[ " + ui.values[ 0 ] + " , " + ui.values[ 1 ] + " ]" );
+      HideByGroup(scaleToColor(ui.values[ 0 ]),scaleToColor(ui.values[ 1 ]))
     }
   });
-  $( "#amount" ).val( $( "#slider-range" ).slider( "values", 0 ) +
-    " - " + $( "#slider-range" ).slider( "values", 1 ) );
+  $( "#amount" ).val( "[ "+$( "#slider-range" ).slider( "values", 0 ) +
+    " , " + $( "#slider-range" ).slider( "values", 1 ) +" ]" );
 } );
 
 $("#slider-range").width($("#legend").width());
@@ -13557,7 +13568,7 @@ fillColor: betaToColor(color,0),
 fillOpacity: 0.75,
 map: map,
 center: location,
-radius: radiusBase+color
+radius: radiusBase+Math.floor(scaleToColor(color))
 });
 
 
@@ -13577,7 +13588,7 @@ google.maps.event.addListenerOnce(map, 'tilesloaded', function() {
     var legendWidth = $('#legendGradient').outerWidth();
 
 var gradientCss = '(left';
-for (var j = 0; j <= 255; ++j) {
+for (var j = minIntensity; j <= maxIntensity; j+=0.1) {
      gradientCss += ', ' + betaToColor(j,1);
 }
 gradientCss += ')';
@@ -13600,7 +13611,7 @@ $('#legendGradient').css('background', 'linear-gradient' + gradientCss);
         $('#legend').append($('<div>').css({
             'position': 'absolute',
             'left': offset + 'px',
-            'top': '15px',
+            'top': '5px',
             'width': '1px',
             'height': '3px',
             'background': 'black'
@@ -13608,7 +13619,7 @@ $('#legendGradient').css('background', 'linear-gradient' + gradientCss);
         $('#legend').append($('<div>').css({
             'position': 'absolute',
             'left': (offset - 5) + 'px',
-            'top': '18px',
+            'top': '8px',
             'width': '10px',
             'text-align': 'center'
         }).html(i));
@@ -13621,7 +13632,7 @@ $('#legendGradient').css('background', 'linear-gradient' + gradientCss);
 // Construct the circle for each station
 for (var station in stations) {
  // Add the circle for this city to the map.
- myCircles.push(placeCircle(stations[station].center,(stations[station].betaNorm+1)/2*255,stations[station].betaNorm,stations[station].stationName));
+ myCircles.push(placeCircle(stations[station].center,stations[station].betaNorm,stations[station].betaNorm,stations[station].stationName));
 }
 
 }
