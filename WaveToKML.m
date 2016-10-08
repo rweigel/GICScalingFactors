@@ -6,8 +6,8 @@ load waveforms_All
 for i=1:length(waveform)
     wave=waveform{i};
     betas=[];
-    for k=1:length(wave.station) 
-        betas=[betas wave.station{k}.betaFactorRaw]; 
+    for k=1:length(wave.station)
+        betas=[betas wave.station{k}.betaFactorRaw];
     end
     betamax=max(betas);
     betamin=min(betas);
@@ -17,16 +17,17 @@ for i=1:length(waveform)
     for j=1:length(wave.station)
         station=wave.station{j};
         fprintf(FH,'%s: {\n',regexprep(station.name,'[^a-zA-Z0-9]',''));
-        fprintf(FH,'center: {lat: %4.4f, lng: %4.4f},\n',station.latitude,station.longitude);
+        fprintf(FH,'center: {lat: %4.4f, lng: %4.4f},\n',station.latitude+randn(1)/100,station.longitude+randn(1)/100);
         fprintf(FH,'beta: %2.4f,\n',station.betaFactorRaw);
-        if(station.betaFactorRaw<0.1),station.betaFactorRaw=0.1; end %Normalize so minimum log10(beta) is -1
+        %if(station.betaFactorRaw<0.1),station.betaFactorRaw=0.01; end %Scale negative values
+        if(station.betaFactorRaw==0),station.betaFactorRaw=0.001; end %To avoid -Inf, but still outside range for marking purposes
         fprintf(FH,'betaNorm: %2.4f,\n',log10(station.betaFactorRaw));
         fprintf(FH,'betaFactorAverage: "%2.4f",\n',station.betaFactorAverage);
         fprintf(FH,'stationName: "%s"\n',regexprep(station.name,'.*\.([A-Z]+[0-9]+).\d{4}.*','$1'));
         fprintf(FH,'},\n');
     end
     fprintf(FH,'};\n');
-    
+
     fclose(FH);
     system(sprintf('cat head.html temp.html foot.html > %s.html',wave.name));
     system('rm temp.html');

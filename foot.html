@@ -1,9 +1,22 @@
 
 function betaToColor(n,type) {
  n=scaleToColor(n); //Scale n from [-1,1] to [0,255]
+
  var R = Math.floor(255*(-0.51*Math.sin(2*3.14*n/305)+0.46));
  var G = Math.floor(255*(0.58*Math.sin(2*3.14*n/911)+0.24));
  var B = Math.floor(255*(0.34*Math.sin(2*3.14*n/308)+0.52));
+
+ if(n<colorMin || n >colorMax) {
+   R=G=B=255; //If point value outside range, color it white
+ }
+
+if(R>colorMax){R=colorMax;}
+if(G>colorMax){G=colorMax;}
+if(B>colorMax){B=colorMax;}
+if(R<colorMin){R=colorMin;}
+if(G<colorMin){G=colorMin;}
+if(B<colorMin){B=colorMin;}
+
  if(type==0) {
   return "#" + hex(R) + hex(G) + hex(B);
  } else {
@@ -64,7 +77,7 @@ var infowindow = new google.maps.InfoWindow();
 function placeCircle(location, color, info, name) {
  var cityCircle = new google.maps.Circle({
 strokeColor: betaToColor(color,0),
-strokeOpacity: 0.75,
+strokeOpacity: 0.0,
 strokeWeight: 1,
 fillColor: betaToColor(color,0),
 fillOpacity: 0.75,
@@ -91,7 +104,7 @@ google.maps.event.addListenerOnce(map, 'tilesloaded', function() {
 
 var gradientCss = '(left';
 for (var j = minIntensity; j <= maxIntensity; j+=0.1) {
-     gradientCss += ', ' + betaToColor(j,1);
+     gradientCss += ', ' + betaToColor(j,1) + ', ' + betaToColor(j,1) + ', ' + betaToColor(j,1);
 }
 gradientCss += ')';
 
@@ -99,6 +112,7 @@ $('#legendGradient').css('background', '-webkit-linear-gradient' + gradientCss);
 $('#legendGradient').css('background', '-moz-linear-gradient' + gradientCss);
 $('#legendGradient').css('background', '-o-linear-gradient' + gradientCss);
 $('#legendGradient').css('background', 'linear-gradient' + gradientCss);
+
 
 
 
@@ -116,7 +130,7 @@ $('#legendGradient').css('background', 'linear-gradient' + gradientCss);
             'top': '5px',
             'width': '1px',
             'height': '3px',
-            'background': 'black'
+            'background': 'white'
         }));
         $('#legend').append($('<div>').css({
             'position': 'absolute',
