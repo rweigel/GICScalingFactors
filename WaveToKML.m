@@ -20,7 +20,7 @@ for i=1:length(waveform)
         fprintf(FH,'center: {lat: %4.4f, lng: %4.4f},\n',station.latitude+randn(1)/100,station.longitude+randn(1)/100);
         fprintf(FH,'beta: %2.4f,\n',station.betaFactorRaw);
         %if(station.betaFactorRaw<0.1),station.betaFactorRaw=0.01; end %Scale negative values
-        if(station.betaFactorRaw==0),station.betaFactorRaw=0.001; end %To avoid -Inf, but still outside range for marking purposes
+        if(station.betaFactorRaw==0),station.betaFactorRaw=0.0001; end %To avoid -Inf, but still outside range for marking purposes
         fprintf(FH,'betaNorm: %2.4f,\n',log10(station.betaFactorRaw));
         fprintf(FH,'betaFactorAverage: "%2.4f",\n',station.betaFactorAverage);
         fprintf(FH,'stationName: "%s"\n',regexprep(station.name,'.*\.([A-Z]+[0-9]+).\d{4}.*','$1'));

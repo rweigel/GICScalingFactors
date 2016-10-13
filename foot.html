@@ -7,8 +7,12 @@ function betaToColor(n,type) {
  var B = Math.floor(255*(0.34*Math.sin(2*3.14*n/308)+0.52));
 
  if(n<colorMin || n >colorMax) {
-   R=G=B=255; //If point value outside range, color it white
+   R=G=B=0; //If point value outside range, color it white
  }
+
+ if(n==-4) {
+  R=G=B=255; //If beta=0
+}
 
 if(R>colorMax){R=colorMax;}
 if(G>colorMax){G=colorMax;}
@@ -74,7 +78,7 @@ $("#slider-range").width($("#legend").width());
 //Create infowindow
 var infowindow = new google.maps.InfoWindow();
 
-function placeCircle(location, color, info, name) {
+function placeCircle(location, color, info, name, betaraw) {
  var cityCircle = new google.maps.Circle({
 strokeColor: betaToColor(color,0),
 strokeOpacity: 0.0,
@@ -89,7 +93,7 @@ radius: radiusBase+Math.floor(scaleToColor(color))
 
 google.maps.event.addListener(cityCircle,'click',function() {
   infowindow.close();
-  infowindow.setContent("<div id='infowindow'>Station: "+name+"<br/>Latitude: "+location.lat+"<br/>Longitude: "+location.lng+"<br/>log<sub>10</sub>(&beta;)="+info+"</div>");
+  infowindow.setContent("<div id='infowindow'>Station: "+name+"<br/>Latitude: "+location.lat+"<br/>Longitude: "+location.lng+"<br/>log<sub>10</sub>(&beta;)="+info+"<br/>&beta;="+betaraw+"</div>");
   infowindow.open(map,cityCircle);
   infowindow.setPosition(location);
   });
@@ -148,7 +152,7 @@ $('#legendGradient').css('background', 'linear-gradient' + gradientCss);
 // Construct the circle for each station
 for (var station in stations) {
  // Add the circle for this city to the map.
- myCircles.push(placeCircle(stations[station].center,stations[station].betaNorm,stations[station].betaNorm,stations[station].stationName));
+ myCircles.push(placeCircle(stations[station].center,stations[station].betaNorm,stations[station].betaNorm,stations[station].stationName,stations[station].beta));
 }
 
 }
