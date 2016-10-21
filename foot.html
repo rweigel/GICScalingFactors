@@ -7,24 +7,24 @@ function betaToColor(n,type) {
  var B = Math.floor(255*(0.34*Math.sin(2*3.14*n/308)+0.52));
 
  if(n<colorMin || n >colorMax) {
-   R=G=B=0; //If point value outside range, color it white
+  R=G=B=0; //If point value outside range, color it white
  }
 
  if(n<scaleToColor(-3.9)) {
   R=G=B=255; //If beta=0
-}
+ }
 
-if(R>colorMax){R=colorMax;}
-if(G>colorMax){G=colorMax;}
-if(B>colorMax){B=colorMax;}
-if(R<colorMin){R=colorMin;}
-if(G<colorMin){G=colorMin;}
-if(B<colorMin){B=colorMin;}
+ if(R>colorMax){R=colorMax;}
+ if(G>colorMax){G=colorMax;}
+ if(B>colorMax){B=colorMax;}
+ if(R<colorMin){R=colorMin;}
+ if(G<colorMin){G=colorMin;}
+ if(B<colorMin){B=colorMin;}
 
  if(type==0) {
   return "#" + hex(R) + hex(G) + hex(B);
  } else {
- return "rgb("+R+","+G+","+B+")";
+  return "rgb("+R+","+G+","+B+")";
  }
 }
 
@@ -35,10 +35,10 @@ var varMax=1;
 var varMin=-1;
 
 function scaleToColor(n) {
-return (colorMax-colorMin)*(n-varMin)/(varMax-varMin)+colorMin;
+ return (colorMax-colorMin)*(n-varMin)/(varMax-varMin)+colorMin;
 }
 function scaleToVar(n) {
-return (varMax-varMin)*(n-colorMin)/(colorMax-colorMin)+varMin;
+ return (varMax-varMin)*(n-colorMin)/(colorMax-colorMin)+varMin;
 }
 
 function hex(x) {
@@ -46,7 +46,11 @@ function hex(x) {
 }
 
 var myCircles=[];
+var DataStruct=[];
 var radiusBase=30000;
+var sliderMin=-5; //Define default global values so hiding function can scale both simultaneously
+var sliderMax=varMax;
+var QFselected=-1;
 
 function initMap() {
  // Create the map.
@@ -58,24 +62,27 @@ mapTypeId: 'terrain'
 
 $( function() {
   $( "#slider-range" ).slider({
-    range: true,
-    min: varMin,
-    max: varMax,
-    step: (varMax-varMin)/20,
-    values: [ varMin, varMax ],
-    slide: function( event, ui ) {
-      $( "#amount" ).val( "[ " + ui.values[ 0 ] + " , " + ui.values[ 1 ] + " ]" );
-      if(ui.values[ 0 ]==varMin) {
-        HideByGroup(scaleToColor(-5),scaleToColor(ui.values[ 1 ]));
-      }
-      else {
-        HideByGroup(scaleToColor(ui.values[ 0 ]),scaleToColor(ui.values[ 1 ]))
-    }
-    }
-  });
+range: true,
+min: varMin,
+max: varMax,
+step: (varMax-varMin)/20,
+values: [ varMin, varMax ],
+slide: function( event, ui ) {
+$( "#amount" ).val( "[ " + ui.values[ 0 ] + " , " + ui.values[ 1 ] + " ]" );
+if(ui.values[ 0 ]==varMin) {
+ sliderMin=-5;
+ sliderMax=ui.values[1];
+}
+else {
+ sliderMin=ui.values[0];
+ sliderMax=ui.values[1];
+}
+UpdateVisible();
+}
+});
   $( "#amount" ).val( "[ "+$( "#slider-range" ).slider( "values", 0 ) +
-    " , " + $( "#slider-range" ).slider( "values", 1 ) +" ]" );
-} );
+   " , " + $( "#slider-range" ).slider( "values", 1 ) +" ]" );
+  } );
 
 $("#slider-range").width($("#legendGradient").width());
 
@@ -83,7 +90,7 @@ $("#slider-range").width($("#legendGradient").width());
 //Create infowindow
 var infowindow = new google.maps.InfoWindow();
 
-function placeCircle(location, color, info, name, betaraw) {
+function placeCircle(location, color, info) {
  var cityCircle = new google.maps.Circle({
 strokeColor: betaToColor(color,0),
 strokeOpacity: 0.0,
@@ -98,7 +105,7 @@ radius: radiusBase+Math.floor(scaleToColor(color))
 
 google.maps.event.addListener(cityCircle,'click',function() {
   infowindow.close();
-  infowindow.setContent("<div id='infowindow'>Station: "+name+"<br/>Latitude: "+location.lat+"<br/>Longitude: "+location.lng+"<br/>log<sub>10</sub>(&beta;)="+info+"<br/>&beta;="+betaraw+"</div>");
+  infowindow.setContent("<div id='infowindow'>Station: "+info.name+"<br/>Latitude: "+location.lat+"<br/>Longitude: "+location.lng+"<br/>log<sub>10</sub>(&beta;)="+info.beta+"<br/>&beta;="+info.betaraw+"<br/>QF="+info.QF+"</div>");
   infowindow.open(map,cityCircle);
   infowindow.setPosition(location);
   });
@@ -107,47 +114,47 @@ return cityCircle;
 }
 
 google.maps.event.addListenerOnce(map, 'tilesloaded', function() {
-    var maxIntensity = 1;
-    var minIntensity = -1;
-    var legendWidth = $('#legendGradient').outerWidth();
+  var maxIntensity = 1;
+  var minIntensity = -1;
+  var legendWidth = $('#legendGradient').outerWidth();
 
-var gradientCss = '(left';
-for (var j = minIntensity; j <= maxIntensity; j+=0.1) {
-     gradientCss += ', ' + betaToColor(j,1) + ', ' + betaToColor(j,1) + ', ' + betaToColor(j,1);
-}
-gradientCss += ')';
+  var gradientCss = '(left';
+    for (var j = minIntensity; j <= maxIntensity; j+=0.1) {
+    gradientCss += ', ' + betaToColor(j,1) + ', ' + betaToColor(j,1) + ', ' + betaToColor(j,1);
+    }
+    gradientCss += ')';
 
-$('#legendGradient').css('background', '-webkit-linear-gradient' + gradientCss);
-$('#legendGradient').css('background', '-moz-linear-gradient' + gradientCss);
-$('#legendGradient').css('background', '-o-linear-gradient' + gradientCss);
-$('#legendGradient').css('background', 'linear-gradient' + gradientCss);
+    $('#legendGradient').css('background', '-webkit-linear-gradient' + gradientCss);
+    $('#legendGradient').css('background', '-moz-linear-gradient' + gradientCss);
+    $('#legendGradient').css('background', '-o-linear-gradient' + gradientCss);
+    $('#legendGradient').css('background', 'linear-gradient' + gradientCss);
 
 
 
 
     for (var i = minIntensity; i <= maxIntensity; ++i) {
-        var offset = (i-minIntensity) * legendWidth / (maxIntensity-minIntensity) ;
-        if (i > minIntensity && i < maxIntensity) {
-            offset -= 0.5;
-        } else if (i == maxIntensity) {
-            offset -= 1;
-        }
+    var offset = (i-minIntensity) * legendWidth / (maxIntensity-minIntensity) ;
+    if (i > minIntensity && i < maxIntensity) {
+    offset -= 0.5;
+    } else if (i == maxIntensity) {
+    offset -= 1;
+    }
 
-        $('#legend').append($('<div>').css({
-            'position': 'absolute',
-            'left': offset + 'px',
-            'top': '5px',
-            'width': '1px',
-            'height': '3px',
-            'background': 'white'
-        }));
-        $('#legend').append($('<div>').css({
-            'position': 'absolute',
-            'left': (offset - 5) + 'px',
-            'top': '8px',
-            'width': '10px',
-            'text-align': 'center'
-        }).html(i));
+    $('#legend').append($('<div>').css({
+       'position': 'absolute',
+       'left': offset + 'px',
+       'top': '5px',
+       'width': '1px',
+       'height': '3px',
+       'background': 'white'
+       }));
+    $('#legend').append($('<div>').css({
+       'position': 'absolute',
+       'left': (offset - 5) + 'px',
+       'top': '8px',
+       'width': '10px',
+       'text-align': 'center'
+       }).html(i));
     }
 
 });
@@ -157,23 +164,28 @@ $('#legendGradient').css('background', 'linear-gradient' + gradientCss);
 // Construct the circle for each station
 for (var station in stations) {
  // Add the circle for this city to the map.
- myCircles.push(placeCircle(stations[station].center,stations[station].betaNorm,stations[station].betaNorm,stations[station].stationName,stations[station].beta));
+ var info={beta: stations[station].betaNorm, name: stations[station].stationName, betaraw: stations[station].beta, QF: stations[station].QF};
+ myCircles.push(placeCircle(stations[station].center,stations[station].betaNorm,info));
+ DataStruct.push(info);
 }
 
 }
 
 
-function HideByGroup(lower,upper){
-
-  for (var i=0; i<myCircles.length; i++){
-    if((myCircles[i].getRadius()-radiusBase<=upper) && (myCircles[i].getRadius()-radiusBase>=lower)){
-      myCircles[i].setVisible(true);
-    }
-    else {
-      myCircles[i].setVisible(false);
-    }
+function UpdateVisible(){
+ var upper=sliderMax;
+ var lower=sliderMin;
+ for (var i=0; i<DataStruct.length; i++){
+  if((DataStruct[i].beta<=upper) && (DataStruct[i].beta>=lower) && (QFselected==-1 || DataStruct[i].QF==QFselected)){
+   myCircles[i].setVisible(true);
   }
+  else {
+   myCircles[i].setVisible(false);
+  }
+ }
 }
+
+
 
 
 </script>

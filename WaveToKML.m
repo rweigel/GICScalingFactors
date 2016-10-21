@@ -2,7 +2,6 @@ function WaveToKML
 
 load waveforms_All
 
-
 for i=1:length(waveform)
     wave=waveform{i};
     betas=[];
@@ -23,6 +22,7 @@ for i=1:length(waveform)
         if(station.betaFactorRaw==0),station.betaFactorRaw=0.0001; end %To avoid -Inf, but still outside range for marking purposes
         fprintf(FH,'betaNorm: %2.4f,\n',log10(station.betaFactorRaw));
         fprintf(FH,'betaFactorAverage: "%2.4f",\n',station.betaFactorAverage);
+        fprintf(FH,'QF: "%d",\n',station.QF);
         fprintf(FH,'stationName: "%s"\n',regexprep(station.name,'.*\.([A-Z]+[0-9]+).\d{4}.*','$1'));
         fprintf(FH,'},\n');
     end
@@ -32,6 +32,7 @@ for i=1:length(waveform)
     system(sprintf('cat head.html temp.html foot.html > %s.html',wave.name));
     system('rm temp.html');
 end
+
 
 %{
 %Estimate the parameters of the parula colormap as simple sinusoidal waves.
