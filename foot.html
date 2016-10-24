@@ -176,7 +176,7 @@ function UpdateVisible(){
  var upper=sliderMax;
  var lower=sliderMin;
  for (var i=0; i<DataStruct.length; i++){
-  if((DataStruct[i].beta<=upper) && (DataStruct[i].beta>=lower) && (QFselected==-1 || DataStruct[i].QF>=QFselected)){
+  if((DataStruct[i].beta<=upper) && (DataStruct[i].beta>=lower) && (QFselected==-1 || (QFselected==0 && DataStruct[i].QF== 0) || (QFselected>0 && DataStruct[i].QF>=QFselected))){
    myCircles[i].setVisible(true);
   }
   else {
