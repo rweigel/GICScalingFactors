@@ -2,4 +2,4 @@
 
 Execute `WaveToKML.m` to generate `{MEA,MMB,NUR,OTT}`.html.
 
-See `index.html` for additional information.
+See `https://rweigel.github.io/GICScalingFactors/` for additional information.
