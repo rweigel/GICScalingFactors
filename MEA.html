@@ -28,7 +28,7 @@
     <label for="amount">log<sub>10</sub>(&beta;):</label>
     <input type="text" id="amount" readonly style="border:0; color:#f6931f; width:60px;">
     QF:
-    <select name="qfdropdown" onchange="QFselected=this.value; UpdateVisible()">
+    <select name="qfdropdown" onchange="QFselected=this.value; updateVisibleCircles()">
       <option value=-1>All</option>
       <option value=0>0</option>
       <option value=1>1-5</option>
@@ -47,187 +47,12 @@
   </div>
 
   <div id="map"></div>
+
+  <!-- Script creates variable named 'STATIONS' -->
   <script src="data/MEA.js"></script>
 
-  <script>
-
-    var colorMax=255;
-    var colorMin=0;
-    var varMax=1;
-    var varMin=-1;
-
-    var myCircles=[];
-    var DataStruct=[];
-    var radiusBase=30000;
-    var sliderMin=-5; //Define default global values so hiding function can scale both simultaneously
-    var sliderMax=varMax;
-    var QFselected=-1;
-
-    //Functions to scale between data range and color/radius range
-    function betaToColor(n,type) {
-      n=scaleToColor(n); //Scale n from [-1,1] to [0,255]
-
-      var R = Math.floor(255*(-0.51*Math.sin(2*3.14*n/305)+0.46));
-      var G = Math.floor(255*(0.58*Math.sin(2*3.14*n/911)+0.24));
-      var B = Math.floor(255*(0.34*Math.sin(2*3.14*n/308)+0.52));
-
-      if(n<colorMin || n >colorMax) {
-        R=G=B=0; //If point value outside range, color it white
-      }
-
-      if (n<scaleToColor(-3.9)) {
-        R=G=B=255; //If beta=0
-      }
-
-      if(R>colorMax){R=colorMax;}
-      if(G>colorMax){G=colorMax;}
-      if(B>colorMax){B=colorMax;}
-      if(R<colorMin){R=colorMin;}
-      if(G<colorMin){G=colorMin;}
-      if(B<colorMin){B=colorMin;}
-
-      if(type==0) {
-      return "#" + hex(R) + hex(G) + hex(B);
-      } else {
-      return "rgb("+R+","+G+","+B+")";
-      }
-    }
-
-    function scaleToColor(n) {
-      return (colorMax-colorMin)*(n-varMin)/(varMax-varMin)+colorMin;
-    }
-
-    function scaleToVar(n) {
-      return (varMax-varMin)*(n-colorMin)/(colorMax-colorMin)+varMin;
-    }
-
-    function hex(x) {
-      return ("0" + parseInt(x).toString(16)).slice(-2);
-    }
-
-    function initMap() {
-      // Create the map.
-      var map = new google.maps.Map(document.getElementById('map'), {
-        zoom: 5,
-        center: {lat: 40.090, lng: -95.712},
-        mapTypeId: 'terrain'
-      });
-
-    $(function() {
-      $( "#slider-range" ).slider(
-        {
-          range: true,
-          min: varMin,
-          max: varMax,
-          step: (varMax-varMin)/20,
-          values: [ varMin, varMax ],
-          slide: function( event, ui ) {
-            $( "#amount" ).val( "[ " + ui.values[ 0 ] + " , " + ui.values[ 1 ] + " ]" );
-            if(ui.values[ 0 ]==varMin) {
-              sliderMin=-5;
-              sliderMax=ui.values[1];
-          } else {
-            sliderMin=ui.values[0];
-            sliderMax=ui.values[1];
-          }
-          UpdateVisible();
-        }
-      });
-
-      $( "#amount" ).val( "[ "+$( "#slider-range" ).slider( "values", 0 ) +
-        " , " + $( "#slider-range" ).slider( "values", 1 ) +" ]" );
-      });
-
-    $("#slider-range").width($("#legendGradient").width());
-
-    //Create infowindow
-    var infowindow = new google.maps.InfoWindow();
-
-    function placeCircle(location, color, info) {
-      var cityCircle = new google.maps.Circle({
-      strokeColor: betaToColor(color,0),
-      strokeOpacity: 0.0,
-      strokeWeight: 1,
-      fillColor: betaToColor(color,0),
-      fillOpacity: 0.75,
-      map: map,
-      center: location,
-      radius: radiusBase+Math.floor(scaleToColor(color))
-    });
-
-    google.maps.event.addListener(cityCircle,'click',function() {
-      infowindow.close();
-      infowindow.setContent("<div id='infowindow'>Station: "+info.name+"<br/>Latitude: "+location.lat+"<br/>Longitude: "+location.lng+"<br/>log<sub>10</sub>(&beta;)="+info.beta+"<br/>&beta;="+info.betaraw+"<br/>QF="+info.QF+"</div>");
-      infowindow.open(map,cityCircle);
-      infowindow.setPosition(location);
-    });
-
-    return cityCircle;
-  }
-
-    google.maps.event.addListenerOnce(map, 'tilesloaded', function() {
-      var maxIntensity = 1;
-      var minIntensity = -1;
-      var legendWidth = $('#legendGradient').outerWidth();
-
-      var gradientCss = '(left';
-        for (var j = minIntensity; j <= maxIntensity; j+=0.1) {
-        gradientCss += ', ' + betaToColor(j,1) + ', ' + betaToColor(j,1) + ', ' + betaToColor(j,1);
-        }
-        gradientCss += ')';
-
-        $('#legendGradient').css('background', '-webkit-linear-gradient' + gradientCss);
-        $('#legendGradient').css('background', '-moz-linear-gradient' + gradientCss);
-        $('#legendGradient').css('background', '-o-linear-gradient' + gradientCss);
-        $('#legendGradient').css('background', 'linear-gradient' + gradientCss);
-
-        for (var i = minIntensity; i <= maxIntensity; ++i) {
-        var offset = (i-minIntensity) * legendWidth / (maxIntensity-minIntensity) ;
-        if (i > minIntensity && i < maxIntensity) {
-        offset -= 0.5;
-        } else if (i == maxIntensity) {
-        offset -= 1;
-        }
-
-        $('#legend').append($('<div>').css({
-            'position': 'absolute',
-            'left': offset + 'px',
-            'top': '5px',
-            'width': '1px',
-            'height': '3px',
-            'background': 'white'
-            }));
-        $('#legend').append($('<div>').css({
-            'position': 'absolute',
-            'left': (offset - 5) + 'px',
-            'top': '8px',
-            'width': '10px',
-            'text-align': 'center'
-            }).html(i));
-        }
-    });
-
-      // Construct the circle for each station
-      for (var station in stations) {
-        // Add the circle for this city to the map.
-        var info={beta: stations[station].betaNorm, name: stations[station].stationName, betaraw: stations[station].beta, QF: stations[station].QF};
-        myCircles.push(placeCircle(stations[station].center,stations[station].betaNorm,info));
-        DataStruct.push(info);
-      }
-    }
-
-    function UpdateVisible(){
-      var upper=sliderMax;
-      var lower=sliderMin;
-      for (var i=0; i<DataStruct.length; i++){
-        if ((DataStruct[i].beta<=upper) && (DataStruct[i].beta>=lower) && (QFselected==-1 || (QFselected==0 && DataStruct[i].QF== 0) || (QFselected>0 && DataStruct[i].QF>=QFselected))){
-          myCircles[i].setVisible(true);
-        } else {
-          myCircles[i].setVisible(false);
-        }
-      }
-    }
-  </script>
+  <!-- The above script depends on variable 'STATIONS' -->
+  <script src="js/index.js"></script>
 
   <script async defer
     src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBFYoTfcSun1W9t2Z3dGm7oW0Kyeix-YVQ&callback=initMap">

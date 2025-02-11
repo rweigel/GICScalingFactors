@@ -20,26 +20,26 @@ for i=1:length(waveform)
 
     fname_js = sprintf('data/%s.js', wave.name(1:3));
     FH = fopen(fname_js,'w');
-    fprintf(FH,'var stations = {\n');
+    fprintf(FH,'var STATIONS = {\n');
 
     % TODO: Put info in struct and use jsonencode. Note that jsonenconde
     % by default uses strings for all values, so will need to handle.
+    % TODO: Compute log in web app.
     for j=1:length(wave.station)
         station = wave.station{j};
         station_name = regexprep(station.name,'[^a-zA-Z0-9]','');
 
         fprintf(FH,'%s: {\n',station_name);
         fprintf(FH,'center: {lat: %4.4f, lng: %4.4f},\n',station.latitude+randn(1)/100,station.longitude+randn(1)/100);
-        fprintf(FH,'beta: %2.4f,\n',station.betaFactorRaw);
-        %if(station.betaFactorRaw<0.1),station.betaFactorRaw=0.01; end %Scale negative values
-        station_data.beta = station.betaFactorRaw;
+        fprintf(FH,'betaFactorRaw: %2.4f,\n',station.betaFactorRaw);
         if (station.betaFactorRaw == 0)
             % To avoid -Inf, but still outside range for marking purposes
-            station_data.betaFactorRaw = 0.0001;
             station.betaFactorRaw=0.0001;
+            station.betaFactorAverage=0.0001;
         end 
-        fprintf(FH,'betaNorm: %2.4f,\n',log10(station.betaFactorRaw));
+        fprintf(FH,'betaFactorRawNorm: %2.4f,\n',log10(station.betaFactorRaw));
         fprintf(FH,'betaFactorAverage: "%2.4f",\n',station.betaFactorAverage);
+        fprintf(FH,'betaFactorAverageNorm: "%2.4f",\n',log10(station.betaFactorAverage));
         fprintf(FH,'QF: "%d",\n',station.QF);
         fprintf(FH,'stationName: "%s"\n',regexprep(station.name,'.*\.([A-Z]+[0-9]+).\d{4}.*','$1'));
         fprintf(FH,'},\n');
