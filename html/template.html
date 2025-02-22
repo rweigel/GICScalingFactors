@@ -25,7 +25,7 @@
 <body>
 
   <div id="legendBox" style="background: #FFF; z-index: 5; padding:15px; border:2px solid black;  border-radius: 10px; position:absolute; right:20px; top:20px;  width:220px; height:60px;">
-    <label for="amount">log<sub>10</sub>(&beta;):</label>
+    <label id="legendBoxLabel" for="amount">log<sub>10</sub>(&beta;):</label>
     <input type="text" id="amount" readonly style="border:0; color:#f6931f; width:60px;">
     QF:
     <select name="qfdropdown" onchange="QFselected=this.value; updateVisibleCircles()">
@@ -54,9 +54,7 @@
   <!-- The above script depends on variable 'STATIONS' -->
   <script src="js/index.js"></script>
 
-  <script async defer
-    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBFYoTfcSun1W9t2Z3dGm7oW0Kyeix-YVQ&callback=initMap">
-  </script>
+  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBFYoTfcSun1W9t2Z3dGm7oW0Kyeix-YVQ&callback=initMap"></script>
 
 </body>
 </html>

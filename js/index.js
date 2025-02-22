@@ -51,10 +51,20 @@ function setCircle(map, infoWindow, stationInfo) {
   });
 
   google.maps.event.addListener(cityCircle,'click', function() {
-    infoWindow.close();
-    infoWindow.setContent("<div id='infowindow'>Station: "+stationInfo.stationName+"<br/>Latitude: "+location.lat+"<br/>Longitude: "+location.lng+"<br/>log<sub>10</sub>(&beta;)="+stationInfo[betaToPlot]+"<br/>&beta;="+stationInfo[betaToPlot]+"<br/>QF="+stationInfo.QF+"</div>");
-    infoWindow.open(map,cityCircle);
-    infoWindow.setPosition(location);
+    infoWindow.close()
+    let div = '<div id="infowindow">'
+    div += `Station: ${stationInfo.stationName}`
+    div += `<br/>Latitude: ${location.lat}`
+    div += `<br/>Longitude: ${location.lng}`
+    div += `<br/>&beta; = ${stationInfo.betaFactorRaw}`
+    div += `<br/><&beta;> = ${stationInfo.betaFactorAverage}`
+    div += `<br/>log<sub>10</sub>(&beta;) = ${stationInfo.betaFactorRawNorm}`
+    div += `<br/>log<sub>10</sub>(<&beta;>) = ${stationInfo.betaFactorAverageNorm}`
+    div += `<br/>QF = ${stationInfo.QF}`
+    div += '</div>'
+    infoWindow.setContent(div)
+    infoWindow.open(map,cityCircle)
+    infoWindow.setPosition(location)
   });
 
   return cityCircle;
@@ -84,6 +94,9 @@ function initSlider() {
   $( "#amount" ).val( "[ "+$( "#slider-range" ).slider( "values", 0 ) +
     " , " + $( "#slider-range" ).slider( "values", 1 ) +" ]" );
   $("#slider-range").width($("#legendGradient").width());
+  if (betaToPlot === "betaFactorAverageNorm") {
+    $("#legendBoxLabel").html("log<sub>10</sub>(<&beta;>):")
+  }
 }
 
 function updateColorBar() {

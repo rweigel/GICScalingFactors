@@ -31,16 +31,16 @@ for i=1:length(waveform)
 
         fprintf(FH,'%s: {\n',station_name);
         fprintf(FH,'center: {lat: %4.4f, lng: %4.4f},\n',station.latitude+randn(1)/100,station.longitude+randn(1)/100);
-        fprintf(FH,'betaFactorRaw: %2.4f,\n',station.betaFactorRaw);
         if (station.betaFactorRaw == 0)
             % To avoid -Inf, but still outside range for marking purposes
             station.betaFactorRaw=0.0001;
             station.betaFactorAverage=0.0001;
-        end 
-        fprintf(FH,'betaFactorRawNorm: %2.4f,\n',log10(station.betaFactorRaw));
-        fprintf(FH,'betaFactorAverage: "%2.4f",\n',station.betaFactorAverage);
-        fprintf(FH,'betaFactorAverageNorm: "%2.4f",\n',log10(station.betaFactorAverage));
-        fprintf(FH,'QF: "%d",\n',station.QF);
+        end
+        fprintf(FH,'betaFactorRaw: %2.2f,\n',station.betaFactorRaw);
+        fprintf(FH,'betaFactorRawNorm: %2.2f,\n',log10(station.betaFactorRaw));
+        fprintf(FH,'betaFactorAverage: %2.2f,\n',station.betaFactorAverage);
+        fprintf(FH,'betaFactorAverageNorm: %2.2f,\n',log10(station.betaFactorAverage));
+        fprintf(FH,'QF: %d,\n',station.QF);
         fprintf(FH,'stationName: "%s"\n',regexprep(station.name,'.*\.([A-Z]+[0-9]+).\d{4}.*','$1'));
         fprintf(FH,'},\n');
     end
